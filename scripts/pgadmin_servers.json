@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Football RAG DB",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "football_rag_db",
+      "Username": "football_rag",
+      "SSLMode": "prefer",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}

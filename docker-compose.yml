@@ -1,0 +1,88 @@
+# ============================================================
+# Football RAG Chatbot — Docker Compose
+# ============================================================
+# Usage:
+#   cp .env.example .env   # fill in your keys
+#   docker compose up -d   # start all services
+#   docker compose logs -f backend  # tail backend logs
+# ============================================================
+
+services:
+  # ── PostgreSQL 15 with pgvector ────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: football-rag-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-football_rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_strong_password_123}
+      POSTGRES_DB: ${POSTGRES_DB:-football_rag_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_pgvector.sql:/docker-entrypoint-initdb.d/01-init-pgvector.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-football_rag} -d ${POSTGRES_DB:-football_rag_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - football-rag-net
+
+  # ── Redis 7 (cache + rate limiting) ───────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: football-rag-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+        --requirepass ${REDIS_PASSWORD:-changeme_redis_password}
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme_redis_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - football-rag-net
+
+  # ── pgAdmin 4 (DB GUI) ────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: football-rag-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@footballrag.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./scripts/pgadmin_servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - football-rag-net
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  football-rag-net:
+    driver: bridge
+    name: football-rag-network

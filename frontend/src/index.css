@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base Styles ─────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-stadium-700;
+  }
+
+  body {
+    @apply bg-stadium-950 text-stadium-100;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-stadium-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-stadium-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-stadium-500;
+  }
+}
+
+/* ── Component Styles ────────────────────────────────────── */
+@layer components {
+  .glass-card {
+    @apply bg-stadium-900/60 backdrop-blur-xl border border-stadium-700/50 rounded-2xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:bg-stadium-800/60 hover:border-stadium-600/50 transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-pitch-600 hover:bg-pitch-500 text-white font-medium rounded-xl
+           transition-all duration-200 active:scale-95 shadow-lg shadow-pitch-600/25;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-stadium-700 hover:bg-stadium-600 text-stadium-200 font-medium rounded-xl
+           transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-stadium-800/50 border border-stadium-700/50 rounded-xl
+           text-stadium-100 placeholder:text-stadium-500
+           focus:outline-none focus:ring-2 focus:ring-pitch-500/50 focus:border-pitch-500/50
+           transition-all duration-200;
+  }
+
+  .badge-win {
+    @apply inline-flex items-center justify-center w-7 h-7 rounded-full bg-pitch-600/20 text-pitch-400 text-xs font-bold;
+  }
+
+  .badge-draw {
+    @apply inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-600/20 text-yellow-400 text-xs font-bold;
+  }
+
+  .badge-loss {
+    @apply inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-600/20 text-red-400 text-xs font-bold;
+  }
+}
