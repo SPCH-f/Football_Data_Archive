@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     )
 
     # ── LLM Provider ─────────────────────────────────────────
-    llm_provider: str = Field(default="openai", description="'openai' or 'anthropic'")
+    llm_provider: str = Field(default="openai", description="'openai', 'anthropic', 'gemini', or 'groq'")
 
     # OpenAI
     openai_api_key: Optional[str] = None
@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     # Anthropic
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-3-haiku-20240307"
+
+    # Gemini
+    gemini_api_key: Optional[str] = None
+    gemini_model: str = "gemini-1.5-flash-latest"
+
+    # Groq
+    groq_api_key: Optional[str] = None
+    groq_model: str = "mixtral-8x7b-32768"
 
     # ── Football APIs ─────────────────────────────────────────
     football_data_api_key: Optional[str] = None
@@ -109,8 +117,8 @@ class Settings(BaseSettings):
     @classmethod
     def validate_llm_provider(cls, v: str) -> str:
         v = v.lower()
-        if v not in ("openai", "anthropic"):
-            raise ValueError("llm_provider must be 'openai' or 'anthropic'")
+        if v not in ("openai", "anthropic", "gemini", "groq"):
+            raise ValueError("llm_provider must be 'openai', 'anthropic', 'gemini', or 'groq'")
         return v
 
 

@@ -4,11 +4,14 @@ Implements the full RAG pipeline: embed query → retrieve → rerank → genera
 """
 from __future__ import annotations
 
+import asyncio
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import AsyncIterator, List, Optional
 
 import structlog
+from openai import APIConnectionError, APIStatusError, RateLimitError
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,11 +23,16 @@ from services.embedding_service import EmbeddingService
 
 logger = structlog.get_logger(__name__)
 
-SYSTEM_PROMPT = """You are FootballGPT, an expert football analyst. Answer using ONLY the provided \
-context. If predicting a match, reason step by step: consider current form (last 5), \
-H2H record, home/away advantage, key absences, and league position. \
-Always cite your sources (match dates, competition names). \
-If context is insufficient, say so — never hallucinate statistics.
+SYSTEM_PROMPT = """You are FootballGPT, an expert football analyst.
+
+⚠️ CRITICAL RULES:
+1. Answer ONLY from the provided context below
+2. If context is insufficient or empty, respond: "ขออภัย ฉันไม่มีข้อมูลเพียงพอในการตอบคำถามนี้ โปรดลองถามคำถามอื่น"
+3. NEVER make up statistics, scores, or rankings
+4. NEVER guess match results or player names not in the context
+5. Always cite sources when available (team names, dates, scores)
+
+If you cannot answer confidently from the context, say so immediately.
 
 Context:
 {context}
@@ -49,46 +57,157 @@ class RAGService:
         top_k = top_k or settings.rag_top_k
         threshold = threshold or settings.rag_similarity_threshold
 
-        # Step 1: Embed the user's question
-        query_embedding = await self.embedder.embed_query(query)
+        try:
+            # Step 1: Embed the user's question
+            query_embedding = await self.embedder.embed_query(query)
 
-        # Step 2: Cosine similarity search via pgvector
-        embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
+            # Step 2: Cosine similarity search via pgvector
+            embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
 
-        result = await db.execute(
-            text("""
-                SELECT
-                    id, content, metadata, 
-                    1 - (embedding <=> (:embedding)::vector) AS similarity
-                FROM football_documents
-                WHERE embedding IS NOT NULL
-                ORDER BY embedding <=> (:embedding)::vector
-                LIMIT :limit
-            """),
-            {"embedding": embedding_str, "limit": top_k * 2},  # Fetch extra for MMR
-        )
-        rows = result.fetchall()
+            result = await db.execute(
+                text("""
+                    SELECT
+                        id, content, metadata,
+                        1 - (embedding <=> (:embedding)::vector) AS similarity
+                    FROM football_documents
+                    WHERE embedding IS NOT NULL
+                    ORDER BY embedding <=> (:embedding)::vector
+                    LIMIT :limit
+                """),
+                {"embedding": embedding_str, "limit": top_k * 2},
+            )
+            rows = result.fetchall()
 
-        # Filter by threshold
-        docs = []
-        for row in rows:
-            if row.similarity >= threshold:
-                docs.append({
-                    "id": str(row.id),
-                    "content": row.content,
-                    "metadata": row.metadata,
-                    "similarity": float(row.similarity),
+            docs = []
+            for row in rows:
+                if row.similarity >= threshold:
+                    docs.append({
+                        "id": str(row.id),
+                        "content": row.content,
+                        "metadata": row.metadata,
+                        "similarity": float(row.similarity),
+                    })
+
+            if settings.rag_use_mmr and len(docs) > top_k:
+                docs = self._mmr_rerank(docs, query_embedding, top_k)
+            else:
+                docs = docs[:top_k]
+
+            logger.info("documents_retrieved", count=len(docs), query_preview=query[:80])
+            if docs:
+                return docs
+
+        except (RateLimitError, APIStatusError, APIConnectionError) as exc:
+            logger.warning(
+                "openai_retrieval_fallback",
+                error=str(exc),
+                query_preview=query[:80],
+            )
+        except Exception:
+            raise
+
+        return await self.retrieve_documents_lexical(query, db, top_k)
+
+    async def retrieve_documents_lexical(
+        self, query: str, db: AsyncSession, top_k: int | None = None
+    ) -> List[dict]:
+        """Fallback retrieval using keyword matching over stored document text."""
+        top_k = top_k or settings.rag_top_k
+        terms = self._extract_search_terms(query)
+
+        if not terms:
+            return []
+
+        result = await db.execute(select(FootballDocument))
+        docs = result.scalars().all()
+
+        ranked = []
+        for doc in docs:
+            content = f"{doc.content or ''} {(doc.metadata_ or {})}".lower()
+            score = sum(1 for term in terms if term in content)
+
+            if score > 0:
+                similarity = min(0.99, round(score / max(len(terms), 1), 2))
+                ranked.append({
+                    "id": str(doc.id),
+                    "content": doc.content,
+                    "metadata": doc.metadata_,
+                    "similarity": similarity,
                 })
 
-        # Step 3: Optional MMR reranking
-        if settings.rag_use_mmr and len(docs) > top_k:
-            docs = self._mmr_rerank(docs, query_embedding, top_k)
-        else:
-            docs = docs[:top_k]
+        ranked.sort(key=lambda item: item["similarity"], reverse=True)
+        logger.info(
+            "lexical_retrieval_used",
+            count=len(ranked),
+            query_preview=query[:80],
+        )
+        return ranked[:top_k]
 
-        logger.info("documents_retrieved", count=len(docs),
-                     query_preview=query[:80])
-        return docs
+    @staticmethod
+    def _extract_search_terms(query: str) -> List[str]:
+        aliases = {
+            "แมนเชสเตอร์ซิตี": "manchester city",
+            "แมนยู": "manchester united",
+            "แมนเชสเตอร์ ยูไนเต็ด": "manchester united",
+            "ลิเวอร์พูล": "liverpool",
+            "เชลซี": "chelsea",
+            "อาร์เซนอล": "arsenal",
+            "บาร์เซโลน่า": "barcelona",
+            "รีลมาดริด": "real madrid",
+            "ปารีส": "paris",
+            "psg": "paris saint germain",
+            "นิวคาสเซิล": "newcastle",
+        }
+
+        raw_query = query.lower()
+        terms = []
+        for alias, replacement in aliases.items():
+            if alias in raw_query:
+                terms.extend(replacement.split())
+
+        for token in re.split(r"[^a-z0-9]+", raw_query):
+            if token and len(token) >= 3:
+                terms.append(token)
+
+        unique_terms = []
+        for term in terms:
+            if term not in unique_terms:
+                unique_terms.append(term)
+        return unique_terms
+
+    @staticmethod
+    def _normalize_query(query: str) -> str:
+        """Normalize a query for lightweight keyword matching."""
+        return " ".join(RAGService._extract_search_terms(query))
+
+    def _build_fallback_response(self, query: str, docs: List[dict]) -> str:
+        """Return a deterministic answer from retrieved documents when LLM is unavailable."""
+        if not docs:
+            return (
+                "ขออภัย ฉันไม่มีข้อมูลเพียงพอในการตอบคำถามนี้ 💔\n\n"
+                "ลองถามเกี่ยวกับ:\n"
+                "• ตารางคะแนนของลีก (Premier League, La Liga, etc.)\n"
+                "• ผลการแข่งขันที่ผ่านมา\n"
+                "• ข้อมูลทีม"
+            )
+
+        lines = [
+            "ขออภัย บริการ LLM หลักของฉันไม่สามารถใช้งานได้ชั่วคราว",
+            "แต่นี่คือข้อมูลที่ฉันค้นหาได้จากฐานข้อมูล:",
+            "",
+        ]
+
+        for doc in docs[:3]:
+            snippet = (doc["content"] or "").replace("\n", " ").strip()
+            if len(snippet) > 300:
+                snippet = snippet[:300] + "..."
+            lines.append(f"• {snippet}")
+            lines.append("")
+
+        lines.append(
+            "ถ้าต้องการข้อมูลเชิงลึกเพิ่มเติม เช่น เปรียบเทียบทีม หรือตารางคะแนนอีกลีก สามารถถามต่อได้ครับ"
+        )
+        return "\n".join(lines)
 
     def _mmr_rerank(
         self, docs: List[dict], query_embedding: List[float],
@@ -173,7 +292,12 @@ class RAGService:
             await db.flush()
 
             # Retrieve relevant documents
-            retrieved_docs = await self.retrieve_documents(query, db)
+            try:
+                retrieved_docs = await self.retrieve_documents(query, db)
+            except Exception as exc:
+                logger.warning("retrieval_error", error=str(exc), query_preview=query[:80])
+                retrieved_docs = await self.retrieve_documents_lexical(query, db, settings.rag_top_k)
+
             context = "\n\n---\n\n".join(
                 f"[Source: {d['metadata'].get('source', 'unknown')} | "
                 f"Type: {d['metadata'].get('type', 'unknown')} | "
@@ -199,14 +323,27 @@ class RAGService:
             # Stream response from LLM
             full_response = ""
 
-            if settings.llm_provider == "openai":
-                async for token in self._stream_openai(messages):
-                    full_response += token
-                    yield token
-            else:
-                async for token in self._stream_anthropic(messages):
-                    full_response += token
-                    yield token
+            try:
+                if settings.llm_provider == "openai":
+                    async for token in self._stream_openai(messages):
+                        full_response += token
+                        yield token
+                elif settings.llm_provider == "anthropic":
+                    async for token in self._stream_anthropic(messages):
+                        full_response += token
+                        yield token
+                elif settings.llm_provider == "groq":
+                    async for token in self._stream_groq(messages):
+                        full_response += token
+                        yield token
+                else:
+                    async for token in self._stream_gemini(messages):
+                        full_response += token
+                        yield token
+            except Exception as exc:
+                logger.warning("llm_fallback", error=str(exc), query_preview=query[:80])
+                full_response = self._build_fallback_response(query, retrieved_docs)
+                yield full_response
 
             # Save assistant message with retrieved doc references
             assistant_msg = ChatMessage(
@@ -295,6 +432,68 @@ class RAGService:
         ) as stream:
             async for text in stream.text_stream:
                 yield text
+
+    async def _stream_gemini(self, messages: List[dict]) -> AsyncIterator[str]:
+        """Stream tokens from Gemini using the current SDK."""
+        from google import genai
+
+        if not settings.gemini_api_key:
+            raise ValueError("GEMINI_API_KEY is not configured")
+
+        client = genai.Client(api_key=settings.gemini_api_key)
+
+        system_content = ""
+        conversation_lines = []
+        for msg in messages:
+            if msg["role"] == "system":
+                system_content = msg["content"]
+            elif msg["role"] in ("user", "assistant"):
+                speaker = "User" if msg["role"] == "user" else "Assistant"
+                conversation_lines.append(f"{speaker}: {msg['content']}")
+
+        prompt = "\n\n".join(conversation_lines)
+        if system_content:
+            prompt = f"{system_content}\n\n{prompt}"
+
+        def _stream():
+            response = client.models.generate_content_stream(
+                model=settings.gemini_model,
+                contents=prompt,
+            )
+            for chunk in response:
+                text = getattr(chunk, "text", None)
+                if text:
+                    yield text
+
+        for text in _stream():
+            yield text
+
+    async def _stream_groq(self, messages: List[dict]) -> AsyncIterator[str]:
+        """Stream tokens from Groq."""
+        from groq import AsyncGroq
+        import httpx
+
+        if not settings.groq_api_key:
+            raise ValueError("GROQ_API_KEY is not configured")
+
+        # Create httpx client without proxies to avoid compatibility issues
+        http_client = httpx.AsyncClient()
+        client = AsyncGroq(api_key=settings.groq_api_key, http_client=http_client)
+
+        try:
+            stream = await client.chat.completions.create(
+                model=settings.groq_model,
+                messages=messages,
+                stream=True,
+                temperature=0.7,
+                max_tokens=2000,
+            )
+
+            async for chunk in stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+        finally:
+            await http_client.aclose()
 
 
 # Singleton
