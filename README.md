@@ -135,7 +135,10 @@ RAG-football/
 
 ## 👨‍💻 การพัฒนาต่อยอด (Local Development)
 
-หากต้องการรันโค้ดเพื่อพัฒนาต่อโดยไม่ใช้ Docker สามารถทำได้ดังนี้:
+**รัน Database และ Redis ด้วย Docker:**
+```bash
+docker compose up -d db redis
+```
 
 **รัน Backend (FastAPI):**
 ```bash
