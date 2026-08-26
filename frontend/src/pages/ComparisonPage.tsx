@@ -1,5 +1,6 @@
 /**
  * ComparisonPage — Side-by-side Team Comparison & AI Match Simulator.
+ * Translated to Thai and upgraded with premium design touches.
  */
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -10,11 +11,11 @@ interface ComparisonPageProps {
 }
 
 const LEAGUES = [
-  { code: 'PL', name: 'Premier League (England)' },
-  { code: 'PD', name: 'La Liga (Spain)' },
-  { code: 'SA', name: 'Serie A (Italy)' },
-  { code: 'BL1', name: 'Bundesliga (Germany)' },
-  { code: 'FL1', name: 'Ligue 1 (France)' },
+  { code: 'PL', name: 'พรีเมียร์ลีก (อังกฤษ)' },
+  { code: 'PD', name: 'ลา ลีกา (สเปน)' },
+  { code: 'SA', name: 'กัลโช่ เซเรีย อา (อิตาลี)' },
+  { code: 'BL1', name: 'บุนเดสลีกา (เยอรมนี)' },
+  { code: 'FL1', name: 'ลีก เอิง (ฝรั่งเศส)' },
 ]
 
 function SafeCrest({ src, alt, fallbackText }: { src?: string; alt: string; fallbackText: string }) {
@@ -103,18 +104,18 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
 
     return (
       <div className="space-y-1">
-        <div className="flex justify-between text-xs font-bold text-slate-300 px-1">
-          <span className="text-emerald-400">{valA}</span>
-          <span className="uppercase text-[10px] text-slate-500 tracking-wider font-semibold">{label}</span>
-          <span className="text-cyan-400">{valB}</span>
+        <div className="flex justify-between text-xs font-bold text-slate-350 px-1">
+          <span className="text-emerald-450 font-extrabold">{valA}</span>
+          <span className="text-[10px] text-slate-400 tracking-wider font-semibold">{label}</span>
+          <span className="text-cyan-450 font-extrabold">{valB}</span>
         </div>
-        <div className="h-2 rounded-full overflow-hidden flex bg-slate-900 border border-slate-900">
+        <div className="h-2 rounded-full overflow-hidden flex bg-slate-950 border border-slate-900">
           <div 
-            className="bg-emerald-500 transition-all duration-300"
+            className="bg-emerald-500 transition-all duration-350"
             style={{ width: `${pctA}%` }}
           />
           <div 
-            className="bg-cyan-400 transition-all duration-300"
+            className="bg-cyan-400 transition-all duration-350"
             style={{ width: `${pctB}%` }}
           />
         </div>
@@ -127,14 +128,14 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
       
       {/* Header */}
       <div className="max-w-4xl mx-auto text-center space-y-2 pb-2">
-        <span className="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-800/30">
+        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/40 px-3.5 py-1.5 rounded-full border border-emerald-800/30">
           ⚔️ Head-to-Head Arena
         </span>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Team Comparison & Match Simulator
+          เปรียบเทียบทีม & จำลองการแข่งด้วย AI
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
-          Compare team statistics side-by-side and run an AI-powered tactical simulation for the upcoming fixture.
+          เปรียบเทียบสถิติคู่แข่งขันแบบหมัดต่อหมัด พร้อมรันระบบวิเคราะห์จำลองแผนการเล่นและผลแข่งขันโดย AI อัจฉริยะ
         </p>
       </div>
 
@@ -145,7 +146,7 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
           
           {/* League Select */}
           <div className="flex flex-col space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Competition</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">เลือกรายการแข่งขัน</label>
             <select
               value={selectedLeague}
               onChange={(e) => {
@@ -153,7 +154,7 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
                 setTeamAId('')
                 setTeamBId('')
               }}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
             >
               {LEAGUES.map((l) => (
                 <option key={l.code} value={l.code}>{l.name}</option>
@@ -163,13 +164,13 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
 
           {/* Team A Select */}
           <div className="flex flex-col space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Home Team (Team A)</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ทีมเหย้า (ทีม A)</label>
             <select
               value={teamAId}
               onChange={(e) => setTeamAId(Number(e.target.value) || '')}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
             >
-              <option value="">-- Choose Team A --</option>
+              <option value="">-- เลือกทีม A --</option>
               {entries
                 .filter((e) => e.team.id !== teamBId)
                 .map((e) => (
@@ -182,13 +183,13 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
 
           {/* Team B Select */}
           <div className="flex flex-col space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Away Team (Team B)</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ทีมเยือน (ทีม B)</label>
             <select
               value={teamBId}
               onChange={(e) => setTeamBId(Number(e.target.value) || '')}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:border-emerald-500/50 outline-none"
             >
-              <option value="">-- Choose Team B --</option>
+              <option value="">-- เลือกทีม B --</option>
               {entries
                 .filter((e) => e.team.id !== teamAId)
                 .map((e) => (
@@ -203,21 +204,21 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
 
         {/* Loading / Empty States */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-10 space-y-2">
-            <div className="w-8 h-8 border-3 border-emerald-600/30 border-t-emerald-400 rounded-full animate-spin" />
-            <span className="text-xs text-slate-400">Loading standings & statistics...</span>
+          <div className="flex flex-col items-center justify-center py-12 space-y-3">
+            <div className="w-9 h-9 border-3 border-emerald-600/30 border-t-emerald-500 rounded-full animate-spin" />
+            <span className="text-xs text-slate-450 animate-pulse">กำลังโหลดข้อมูลตารางคะแนนและสถิติทีม...</span>
           </div>
         )}
 
         {error && (
-          <div className="text-center py-8 text-xs text-slate-500">
-            Failed to retrieve competition teams.
+          <div className="text-center py-8 text-xs text-slate-500 bg-red-950/10 border border-red-950/20 rounded-xl">
+            เกิดข้อผิดพลาดในการโหลดข้อมูลทีมการแข่งขัน
           </div>
         )}
 
         {!isLoading && !error && (!teamAEntry || !teamBEntry) && (
-          <div className="bg-slate-950/30 border border-dashed border-slate-800 rounded-xl p-8 text-center text-slate-500 text-xs">
-            Select both Home and Away teams to view comparison stats and run simulation.
+          <div className="bg-slate-950/30 border border-dashed border-slate-800/80 rounded-xl p-10 text-center text-slate-450 text-xs">
+            💡 กรุณาเลือกทั้งทีมเหย้าและทีมเยือนด้านบน เพื่อเริ่มต้นการเปรียบเทียบสถิติและจำลองแมตช์การแข่ง
           </div>
         )}
 
@@ -226,36 +227,39 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
           <div className="space-y-6 animate-fade-in">
             
             {/* Team Crests & Positions */}
-            <div className="grid grid-cols-3 items-center justify-items-center bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+            <div className="grid grid-cols-3 items-center justify-items-center bg-slate-950/40 p-5 rounded-2xl border border-slate-900 relative overflow-hidden">
+              {/* Glowing vertical separating line */}
+              <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-slate-900" />
+              
               {/* Team A Info */}
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center p-2">
+              <div className="flex flex-col items-center text-center space-y-2 z-10">
+                <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center p-2.5 shadow-md">
                   <SafeCrest
                     src={teamAEntry.team.logo_url}
                     alt={teamAEntry.team.name}
                     fallbackText={teamAEntry.team.name}
                   />
                 </div>
-                <div className="text-xs sm:text-sm font-extrabold uppercase text-slate-200">{teamAEntry.team.name}</div>
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Position: #{teamAEntry.position}</span>
+                <div className="text-xs sm:text-sm font-black uppercase text-slate-200">{teamAEntry.team.name}</div>
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-900/40 uppercase tracking-wider">อันดับ: #{teamAEntry.position}</span>
               </div>
 
-              {/* VS */}
-              <div className="text-center">
-                <span className="text-xs font-black tracking-widest text-slate-600 uppercase">VS</span>
+              {/* VS label */}
+              <div className="text-center z-10 bg-[#0b131f] px-3 py-1 rounded-full border border-slate-900">
+                <span className="text-xs font-black tracking-widest text-slate-500 uppercase">VS</span>
               </div>
 
               {/* Team B Info */}
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center p-2">
+              <div className="flex flex-col items-center text-center space-y-2 z-10">
+                <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center p-2.5 shadow-md">
                   <SafeCrest
                     src={teamBEntry.team.logo_url}
                     alt={teamBEntry.team.name}
                     fallbackText={teamBEntry.team.name}
                   />
                 </div>
-                <div className="text-xs sm:text-sm font-extrabold uppercase text-slate-200">{teamBEntry.team.name}</div>
-                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Position: #{teamBEntry.position}</span>
+                <div className="text-xs sm:text-sm font-black uppercase text-slate-200">{teamBEntry.team.name}</div>
+                <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/30 px-2 py-0.5 rounded-full border border-cyan-900/40 uppercase tracking-wider">อันดับ: #{teamBEntry.position}</span>
               </div>
             </div>
 
@@ -263,71 +267,71 @@ export default function ComparisonPage({ onPredictMatch }: ComparisonPageProps) 
             <div className="grid grid-cols-2 gap-4 text-center">
               {/* Form A */}
               <div className="bg-slate-950/20 p-3 rounded-xl border border-slate-900/40 flex flex-col items-center">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Recent Form</span>
-                <div className="flex gap-1">
+                <span className="text-[9px] font-bold text-slate-450 uppercase tracking-wider mb-2">ฟอร์ม 5 นัดหลังสุด</span>
+                <div className="flex gap-1.5">
                   {teamAFormRes?.form && teamAFormRes.form.length > 0 ? (
                     teamAFormRes.form.slice(-5).map((f, i) => (
                       <span
                         key={i}
-                        className={`w-5 h-5 rounded text-[10px] font-black flex items-center justify-center text-white
-                          ${f === 'W' ? 'bg-green-600' : f === 'D' ? 'bg-yellow-600' : 'bg-red-650'}`}
+                        className={`w-5.5 h-5.5 rounded-md text-[10px] font-black flex items-center justify-center text-white shadow-sm
+                          ${f === 'W' ? 'bg-green-600' : f === 'D' ? 'bg-yellow-600' : 'bg-red-655'}`}
                       >
                         {f}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[10px] text-slate-500">No recent stats</span>
+                    <span className="text-[10px] text-slate-500">ไม่มีข้อมูลสถิติ</span>
                   )}
                 </div>
               </div>
 
               {/* Form B */}
               <div className="bg-slate-950/20 p-3 rounded-xl border border-slate-900/40 flex flex-col items-center">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Recent Form</span>
-                <div className="flex gap-1">
+                <span className="text-[9px] font-bold text-slate-455 uppercase tracking-wider mb-2">ฟอร์ม 5 นัดหลังสุด</span>
+                <div className="flex gap-1.5">
                   {teamBFormRes?.form && teamBFormRes.form.length > 0 ? (
                     teamBFormRes.form.slice(-5).map((f, i) => (
                       <span
                         key={i}
-                        className={`w-5 h-5 rounded text-[10px] font-black flex items-center justify-center text-white
-                          ${f === 'W' ? 'bg-green-600' : f === 'D' ? 'bg-yellow-600' : 'bg-red-650'}`}
+                        className={`w-5.5 h-5.5 rounded-md text-[10px] font-black flex items-center justify-center text-white shadow-sm
+                          ${f === 'W' ? 'bg-green-600' : f === 'D' ? 'bg-yellow-600' : 'bg-red-655'}`}
                       >
                         {f}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[10px] text-slate-500">No recent stats</span>
+                    <span className="text-[10px] text-slate-500">ไม่มีข้อมูลสถิติ</span>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Comparison Stats List */}
-            <div className="space-y-4 bg-slate-950/20 p-4 rounded-xl border border-slate-900">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center border-b border-slate-900 pb-2">
-                📈 Season Statistics Comparison
+            <div className="space-y-4 bg-slate-950/30 p-4 sm:p-5 rounded-2xl border border-slate-900">
+              <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest text-center border-b border-slate-900 pb-2">
+                📈 สถิติเปรียบเทียบในลีกฤดูกาลปัจจุบัน
               </h4>
               
-              {renderStatBar('League Points', teamAEntry.points, teamBEntry.points)}
-              {renderStatBar('Matches Played', teamAEntry.played, teamBEntry.played)}
-              {renderStatBar('Matches Won', teamAEntry.won, teamBEntry.won)}
-              {renderStatBar('Matches Drawn', teamAEntry.drawn, teamBEntry.drawn)}
-              {renderStatBar('Matches Lost', teamAEntry.lost, teamBEntry.lost)}
-              {renderStatBar('Goals Scored', teamAEntry.goals_for, teamBEntry.goals_for)}
-              {renderStatBar('Goals Conceded', teamAEntry.goals_against, teamBEntry.goals_against)}
-              {renderStatBar('Goal Difference', teamAEntry.goal_difference + 50, teamBEntry.goal_difference + 50)}
+              {renderStatBar('คะแนนรวมทั้งหมด', teamAEntry.points, teamBEntry.points)}
+              {renderStatBar('ลงเล่นทั้งหมด (นัด)', teamAEntry.played, teamBEntry.played)}
+              {renderStatBar('จำนวนนัดที่ชนะ', teamAEntry.won, teamBEntry.won)}
+              {renderStatBar('จำนวนนัดที่เสมอ', teamAEntry.drawn, teamBEntry.drawn)}
+              {renderStatBar('จำนวนนัดที่แพ้', teamAEntry.lost, teamBEntry.lost)}
+              {renderStatBar('ประตูที่ทำได้ (ได้)', teamAEntry.goals_for, teamBEntry.goals_for)}
+              {renderStatBar('ประตูที่เสีย (เสีย)', teamAEntry.goals_against, teamBEntry.goals_against)}
+              {renderStatBar('ผลต่างประตูได้-เสีย', teamAEntry.goal_difference + 50, teamBEntry.goal_difference + 50)}
             </div>
 
             {/* Simulation Trigger Box */}
-            <div className="flex flex-col items-center pt-2">
+            <div className="flex flex-col items-center pt-3 border-t border-slate-900">
               <button
                 onClick={handleSimulate}
                 className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 text-xs font-black tracking-widest uppercase rounded-xl hover:opacity-90 transition-all shadow-lg active:scale-98 flex items-center gap-2"
               >
-                🔮 Run AI Simulation
+                🔮 เริ่มจำลองแมตช์ด้วย AI
               </button>
-              <span className="text-[10px] text-slate-500 mt-2">
-                This will trigger RAG AI model to generate scores, tactics, and H2H predictions.
+              <span className="text-[10px] text-slate-500 mt-2 text-center max-w-sm">
+                การกดจำลองจะสั่งให้ RAG AI ประมวลผลจากสถิติของทีม แทคติกการเล่น ฟอร์มปัจจุบัน และวิเคราะห์คาดการณ์ผลสกอร์ในแชทบอท
               </span>
             </div>
 

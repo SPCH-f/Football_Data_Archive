@@ -102,11 +102,12 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
               }
 
               // Append token to assistant message
+              const unescapedData = data.replace(/\\n/g, '\n')
               setMessages((prev) => {
                 const updated = [...prev]
                 const lastMsg = updated[updated.length - 1]
                 if (lastMsg && lastMsg.role === 'assistant') {
-                  lastMsg.content += data
+                  updated[updated.length - 1] = { ...lastMsg, content: lastMsg.content + unescapedData }
                 }
                 return updated
               })

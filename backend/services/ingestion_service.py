@@ -146,7 +146,7 @@ class IngestionService:
     ) -> Optional[dict]:
         """Build a NL chunk for league standings."""
         lines = [f"{comp.name} Standings (Current Season):"]
-        for s in standings[:10]:  # Top 10
+        for s in standings:  # All teams
             team = await db.get(Team, s.team_id)
             name = team.name if team else f"Team {s.team_id}"
             gd = f"+{s.goal_difference}" if s.goal_difference > 0 else str(s.goal_difference)

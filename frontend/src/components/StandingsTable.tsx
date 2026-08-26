@@ -1,5 +1,6 @@
 /**
  * StandingsTable — sortable league table component.
+ * Translated to Thai with standard Thai football table labels.
  */
 import { useState } from 'react'
 import type { StandingEntry } from '@/api/client'
@@ -36,95 +37,95 @@ export default function StandingsTable({ competition, season, standings }: Stand
   const SortHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
     <th
       onClick={() => handleSort(sortKeyName)}
-      className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase tracking-wider 
-                 cursor-pointer hover:text-pitch-400 transition-colors select-none"
+      className="px-2 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider 
+                 cursor-pointer hover:text-emerald-400 transition-colors select-none"
     >
       {label}
       {sortKey === sortKeyName && (
-        <span className="ml-1 text-pitch-400">{sortAsc ? '↑' : '↓'}</span>
+        <span className="ml-1 text-emerald-450">{sortAsc ? '↑' : '↓'}</span>
       )}
     </th>
   )
 
   return (
-    <div className="glass-card overflow-hidden">
+    <div className="bg-[#0b131f] border border-slate-900 overflow-hidden rounded-2xl shadow-xl">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-stadium-700/50">
-        <h3 className="text-lg font-bold text-stadium-100">{competition}</h3>
-        <p className="text-xs text-stadium-500">{season}</p>
+      <div className="px-5 py-4 border-b border-slate-900/60 bg-slate-950/20">
+        <h3 className="text-base font-bold text-slate-100">{competition}</h3>
+        <p className="text-[10px] text-slate-500 font-bold mt-0.5">{season}</p>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-stadium-800/50">
+            <tr className="border-b border-slate-900 bg-slate-950/40 text-slate-400">
               <SortHeader label="#" sortKeyName="position" />
-              <th className="px-3 py-3 text-left text-xs font-semibold text-stadium-400 uppercase tracking-wider">
-                Team
+              <th className="px-3 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                สโมสร
               </th>
-              <th className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase">P</th>
-              <SortHeader label="W" sortKeyName="won" />
-              <th className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase">D</th>
-              <th className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase">L</th>
-              <SortHeader label="GF" sortKeyName="goals_for" />
-              <th className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase">GA</th>
-              <SortHeader label="GD" sortKeyName="goal_difference" />
-              <SortHeader label="Pts" sortKeyName="points" />
-              <th className="px-2 py-3 text-xs font-semibold text-stadium-400 uppercase">Form</th>
+              <th className="px-2 py-3.5 font-bold uppercase" title="แข่ง">แข่ง</th>
+              <SortHeader label="ชนะ" sortKeyName="won" />
+              <th className="px-2 py-3.5 font-bold uppercase" title="เสมอ">เสมอ</th>
+              <th className="px-2 py-3.5 font-bold uppercase" title="แพ้">แพ้</th>
+              <SortHeader label="ได้" sortKeyName="goals_for" />
+              <th className="px-2 py-3.5 font-bold uppercase" title="เสีย">เสีย</th>
+              <SortHeader label="+/-" sortKeyName="goal_difference" />
+              <SortHeader label="แต้ม" sortKeyName="points" />
+              <th className="px-3 py-3.5 font-bold uppercase text-center">ฟอร์ม 5 นัดล่าสุด</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((entry) => {
               // Row styling based on position zones
               let rowBorder = ''
-              if (entry.position <= 4) rowBorder = 'border-l-2 border-l-pitch-500'
+              if (entry.position <= 4) rowBorder = 'border-l-3 border-l-emerald-500'
               else if (entry.position >= standings.length - 2)
-                rowBorder = 'border-l-2 border-l-red-500'
+                rowBorder = 'border-l-3 border-l-red-500'
 
               return (
                 <tr
                   key={entry.team.id}
-                  className={`border-b border-stadium-800/30 hover:bg-stadium-800/30 
+                  className={`border-b border-slate-900/40 hover:bg-slate-900/50 
                              transition-colors ${rowBorder}`}
                 >
-                  <td className="px-3 py-2.5 text-center font-bold text-stadium-300">
+                  <td className="px-3 py-3 text-center font-extrabold text-slate-350">
                     {entry.position}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
                       {entry.team.logo_url && (
                         <img
                           src={entry.team.logo_url}
                           alt={entry.team.name}
-                          className="w-5 h-5 object-contain"
+                          className="w-4 h-4 object-contain"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                         />
                       )}
-                      <span className="font-medium text-stadium-100 whitespace-nowrap">
+                      <span className="font-bold text-slate-100 whitespace-nowrap">
                         {entry.team.name}
                       </span>
                     </div>
                   </td>
-                  <td className="px-2 py-2.5 text-center text-stadium-400">{entry.played}</td>
-                  <td className="px-2 py-2.5 text-center text-stadium-300">{entry.won}</td>
-                  <td className="px-2 py-2.5 text-center text-stadium-400">{entry.drawn}</td>
-                  <td className="px-2 py-2.5 text-center text-stadium-400">{entry.lost}</td>
-                  <td className="px-2 py-2.5 text-center text-stadium-300">{entry.goals_for}</td>
-                  <td className="px-2 py-2.5 text-center text-stadium-400">{entry.goals_against}</td>
-                  <td className={`px-2 py-2.5 text-center font-medium ${
+                  <td className="px-2 py-3 text-center text-slate-400 font-medium">{entry.played}</td>
+                  <td className="px-2 py-3 text-center text-slate-300 font-bold">{entry.won}</td>
+                  <td className="px-2 py-3 text-center text-slate-400 font-medium">{entry.drawn}</td>
+                  <td className="px-2 py-3 text-center text-slate-400 font-medium">{entry.lost}</td>
+                  <td className="px-2 py-3 text-center text-slate-350">{entry.goals_for}</td>
+                  <td className="px-2 py-3 text-center text-slate-450">{entry.goals_against}</td>
+                  <td className={`px-2 py-3 text-center font-bold ${
                     entry.goal_difference > 0
-                      ? 'text-pitch-400'
+                      ? 'text-emerald-400'
                       : entry.goal_difference < 0
                         ? 'text-red-400'
-                        : 'text-stadium-400'
+                        : 'text-slate-400'
                   }`}>
                     {entry.goal_difference > 0 ? '+' : ''}{entry.goal_difference}
                   </td>
-                  <td className="px-2 py-2.5 text-center font-bold text-stadium-100">
+                  <td className="px-2 py-3 text-center font-black text-white bg-slate-950/20">
                     {entry.points}
                   </td>
-                  <td className="px-2 py-2.5">
+                  <td className="px-3 py-3 flex justify-center">
                     {entry.form && (
                       <FormBadge form={entry.form.split(',').map((f: string) => f.trim())} />
                     )}
@@ -137,12 +138,12 @@ export default function StandingsTable({ competition, season, standings }: Stand
       </div>
 
       {/* Legend */}
-      <div className="px-5 py-3 border-t border-stadium-800/50 flex items-center gap-4 text-[10px] text-stadium-500">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-pitch-500" /> Champions League
+      <div className="px-5 py-3 border-t border-slate-900 bg-slate-950/10 flex items-center gap-5 text-[10px] text-slate-500 font-semibold">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" /> โควต้า ยูฟ่า แชมเปียนส์ลีก (UCL)
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-red-500" /> Relegation
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]" /> โซนตกชั้น
         </span>
       </div>
     </div>

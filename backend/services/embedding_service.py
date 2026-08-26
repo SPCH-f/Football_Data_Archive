@@ -74,8 +74,8 @@ class EmbeddingService:
         from sentence_transformers import SentenceTransformer
 
         if self._model is None:
-            self._model = SentenceTransformer("all-MiniLM-L6-v2")
-            logger.info("local_model_loaded", model="all-MiniLM-L6-v2")
+            self._model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+            logger.info("local_model_loaded", model="paraphrase-multilingual-MiniLM-L12-v2")
 
         embeddings = self._model.encode(texts, show_progress_bar=False)
         logger.info("local_embeddings_created", count=len(embeddings))

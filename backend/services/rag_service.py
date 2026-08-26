@@ -23,19 +23,17 @@ from services.embedding_service import EmbeddingService
 
 logger = structlog.get_logger(__name__)
 
-SYSTEM_PROMPT = """You are FootballGPT, an expert football analyst.
+SYSTEM_PROMPT = """You are FootballGPT, an expert football analyst assistant.
+
+Context from database:
+{context}
 
 ⚠️ CRITICAL RULES:
-1. Answer ONLY from the provided context below
-2. If context is insufficient or empty, respond: "ขออภัย ฉันไม่มีข้อมูลเพียงพอในการตอบคำถามนี้ โปรดลองถามคำถามอื่น"
-3. NEVER make up statistics, scores, or rankings
-4. NEVER guess match results or player names not in the context
-5. Always cite sources when available (team names, dates, scores)
-
-If you cannot answer confidently from the context, say so immediately.
-
-Context:
-{context}
+1. For ANY questions about football matches, standings, scores, or teams, you MUST answer ONLY from the provided context above.
+2. If the user asks about football data that is NOT in the context, respond exactly: "ขออภัย ฉันไม่มีข้อมูลเพียงพอในการตอบคำถามนี้ โปรดลองถามคำถามอื่น"
+3. NEVER make up statistics, scores, or rankings.
+4. You MAY answer general conversational questions (greetings, asking what you can do) naturally and politely, explaining that you can answer questions about football standings and matches based on the database.
+5. ALWAYS answer in THAI language.
 
 Today's date: {today}"""
 
@@ -55,7 +53,8 @@ class RAGService:
     ) -> List[dict]:
         """Embed query and perform cosine similarity search with optional MMR reranking."""
         top_k = top_k or settings.rag_top_k
-        threshold = threshold or settings.rag_similarity_threshold
+        # Use a lower threshold for Thai queries since embeddings are trained on English docs
+        threshold = threshold or min(settings.rag_similarity_threshold, 0.15)
 
         try:
             # Step 1: Embed the user's question
@@ -324,26 +323,62 @@ class RAGService:
             full_response = ""
 
             try:
+                buffer = ""
+                in_think_block = False
+                think_closed = False
+                
+                # Select the appropriate stream generator
                 if settings.llm_provider == "openai":
-                    async for token in self._stream_openai(messages):
-                        full_response += token
-                        yield token
+                    token_stream = self._stream_openai(messages)
                 elif settings.llm_provider == "anthropic":
-                    async for token in self._stream_anthropic(messages):
-                        full_response += token
-                        yield token
+                    token_stream = self._stream_anthropic(messages)
                 elif settings.llm_provider == "groq":
-                    async for token in self._stream_groq(messages):
-                        full_response += token
-                        yield token
+                    token_stream = self._stream_groq(messages)
                 else:
-                    async for token in self._stream_gemini(messages):
-                        full_response += token
-                        yield token
+                    token_stream = self._stream_gemini(messages)
+
+                async for token in token_stream:
+                    full_response += token
+                    
+                    if think_closed:
+                        # Replace newlines with spaces or just yield it? 
+                        # Wait, the SSE problem was newlines in a SINGLE yield. 
+                        # If we yield chunk by chunk, newlines are fine, 
+                        # BUT we must replace actual newlines in tokens with a special sequence if we want to avoid breaking SSE.
+                        # Actually, useChat.ts parses SSE. If token contains \n, it breaks SSE.
+                        # Let's replace \n with actual \n tokens safely, or just replace \n with \\n for JSON.
+                        # Since chat.py does `yield f"data: {token}\n\n"`, if token has a \n, it breaks the format!
+                        # So we must replace \n in the token with something else? No, we can just replace \n with \n data: 
+                        # Or better, just remove newlines? No, we need newlines for formatting!
+                        # The standard way to send newlines in SSE is to escape them, or just let useChat.ts handle it.
+                        # Let's escape \n as \\n.
+                        escaped_token = token.replace("\n", "\\n")
+                        yield escaped_token
+                        continue
+                        
+                    buffer += token
+                    if not in_think_block:
+                        if "<think>" in buffer:
+                            in_think_block = True
+                        elif len(buffer) > 20 and "<think>" not in buffer:
+                            # It's not generating a think block, just yield buffer and proceed
+                            think_closed = True
+                            escaped_token = buffer.replace("\n", "\\n")
+                            yield escaped_token
+                            
+                    if in_think_block:
+                        if "</think>" in buffer:
+                            think_closed = True
+                            after_think = buffer.split("</think>")[-1]
+                            if after_think:
+                                escaped_token = after_think.replace("\n", "\\n")
+                                yield escaped_token
+                                
             except Exception as exc:
                 logger.warning("llm_fallback", error=str(exc), query_preview=query[:80])
-                full_response = self._build_fallback_response(query, retrieved_docs)
-                yield full_response
+                fallback_msg = self._build_fallback_response(query, retrieved_docs)
+                full_response = fallback_msg
+                yield fallback_msg.replace("\n", "\\n")
 
             # Save assistant message with retrieved doc references
             assistant_msg = ChatMessage(

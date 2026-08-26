@@ -1,5 +1,6 @@
 /**
  * StandingsPage — Browse league tables for tracked football competitions.
+ * Translated to Thai and styled with premium design elements.
  */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -10,17 +11,17 @@ interface LeagueOption {
   code: string
   name: string
   country: string
-  icon: string
+  logoUrl: string
   color: string
 }
 
 const LEAGUES: LeagueOption[] = [
-  { code: 'PL', name: 'Premier League', country: 'England', icon: '🦁', color: 'from-purple-600 to-indigo-600' },
-  { code: 'PD', name: 'La Liga', country: 'Spain', icon: '🇪🇸', color: 'from-amber-500 to-red-600' },
-  { code: 'BL1', name: 'Bundesliga', country: 'Germany', icon: '🇩🇪', color: 'from-red-600 to-black' },
-  { code: 'SA', name: 'Serie A', country: 'Italy', icon: '🇮🇹', color: 'from-blue-600 to-cyan-500' },
-  { code: 'FL1', name: 'Ligue 1', country: 'France', icon: '🇫🇷', color: 'from-emerald-500 to-teal-700' },
-  { code: 'CL', name: 'Champions League', country: 'Europe', icon: '⭐', color: 'from-blue-900 to-indigo-950' },
+  { code: 'PL', name: 'พรีเมียร์ลีก', country: 'อังกฤษ', logoUrl: 'https://crests.football-data.org/PL.png', color: 'from-purple-600 to-indigo-650' },
+  { code: 'PD', name: 'ลา ลีกา', country: 'สเปน', logoUrl: 'https://crests.football-data.org/PD.png', color: 'from-amber-500 to-red-600' },
+  { code: 'BL1', name: 'บุนเดสลีกา', country: 'เยอรมนี', logoUrl: 'https://crests.football-data.org/BL1.png', color: 'from-red-600 to-black' },
+  { code: 'SA', name: 'เซเรีย อา', country: 'อิตาลี', logoUrl: 'https://crests.football-data.org/SA.png', color: 'from-blue-600 to-cyan-550' },
+  { code: 'FL1', name: 'ลีก เอิง', country: 'ฝรั่งเศส', logoUrl: 'https://crests.football-data.org/FL1.png', color: 'from-emerald-500 to-teal-700' },
+  { code: 'CL', name: 'แชมเปียนส์ลีก', country: 'ยุโรป', logoUrl: 'https://crests.football-data.org/CL.png', color: 'from-blue-900 to-indigo-950' },
 ]
 
 export default function StandingsPage() {
@@ -49,17 +50,17 @@ export default function StandingsPage() {
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
       {/* Page Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-stadium-900/80 to-stadium-850/80 p-6 sm:p-8 border border-stadium-700/30">
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-56 h-56 rounded-full bg-pitch-600/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900/90 to-slate-950/90 p-6 sm:p-8 border border-slate-800/40">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-56 h-56 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
         <div className="relative z-10 space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-pitch-400 bg-pitch-950/50 px-3 py-1 rounded-full border border-pitch-800/30">
-            Live Statistics
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-900/30">
+            📊 ข้อมูลสถิติอัปเดตสด
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            League Standings
+            ตารางคะแนนลีกชั้นนำ
           </h1>
-          <p className="text-sm text-stadium-400 max-w-xl">
-            Browse real-time standings, team form, goal statistics, and ranking updates for the top European leagues.
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+            เช็คตารางคะแนนล่าสุด ฟอร์มการเล่นของแต่ละสโมสร สถิติประตูได้เสีย และการขยับอันดับแบบเรียลไทม์จากลีกใหญ่อย่างเป็นทางการ
           </p>
         </div>
       </div>
@@ -78,23 +79,28 @@ export default function StandingsPage() {
               className={`group relative overflow-hidden flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 active:scale-98
                 ${
                   isActive
-                    ? 'bg-gradient-to-br from-stadium-800/80 to-stadium-900/80 border-pitch-500 shadow-lg shadow-pitch-600/5'
-                    : 'glass-card-hover border-stadium-800'
+                    ? 'bg-slate-900 border-emerald-500 shadow-lg shadow-emerald-500/5'
+                    : 'bg-slate-900/40 hover:bg-slate-900/80 border-slate-800/80 hover:border-slate-700/80'
                 }`}
             >
               {/* Top border colored glow line on active */}
               {isActive && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-pitch-500 shadow-[0_0_12px_rgba(34,197,94,0.5)]" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_12px_rgba(34,197,94,0.5)]" />
               )}
               
-              <span className="text-2xl mb-1.5 transform group-hover:scale-110 transition-transform duration-200">
-                {league.icon}
-              </span>
-              <span className={`text-sm font-bold text-center ${isActive ? 'text-white' : 'text-stadium-200'}`}>
+              <div className="w-10 h-10 bg-slate-950/60 rounded-xl flex items-center justify-center p-1.5 mb-2 transform group-hover:scale-110 transition-transform duration-200">
+                <img
+                  src={league.logoUrl}
+                  alt={league.name}
+                  className="w-full h-full object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              </div>
+              <span className={`text-xs sm:text-sm font-bold text-center ${isActive ? 'text-white' : 'text-slate-350'}`}>
                 {league.name}
               </span>
-              <span className="text-[10px] text-stadium-500 mt-0.5">
-                {league.country}
+              <span className="text-[9px] text-slate-500 mt-0.5">
+                ลีก{league.country}
               </span>
             </button>
           )
@@ -104,23 +110,23 @@ export default function StandingsPage() {
       {/* Search & Stats Section */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-stadium-500">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
             🔍
           </span>
           <input
             type="text"
-            placeholder="Search teams..."
+            placeholder="ค้นหาทีมฟุตบอล..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-stadium-900/50 border border-stadium-800 rounded-xl
-                     text-sm text-stadium-100 placeholder:text-stadium-500
-                     focus:outline-none focus:ring-2 focus:ring-pitch-500/30 focus:border-pitch-500/50
+            className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl
+                     text-xs sm:text-sm text-slate-100 placeholder:text-slate-500
+                     focus:outline-none focus:ring-1 focus:ring-emerald-500/20 focus:border-emerald-500/50
                      transition-all duration-200"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-stadium-500 hover:text-stadium-300"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300"
             >
               ✕
             </button>
@@ -131,24 +137,24 @@ export default function StandingsPage() {
       {/* Main Table Content */}
       <div className="relative min-h-[400px]">
         {isLoading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 bg-stadium-950/20 backdrop-blur-xs rounded-2xl">
-            <div className="w-10 h-10 border-4 border-pitch-600/30 border-t-pitch-500 rounded-full animate-spin" />
-            <span className="text-sm text-stadium-400 font-medium animate-pulse">Loading standings...</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 bg-slate-950/20 backdrop-blur-xs rounded-2xl">
+            <div className="w-9 h-9 border-3 border-emerald-600/30 border-t-emerald-500 rounded-full animate-spin" />
+            <span className="text-xs text-slate-400 font-medium animate-pulse">กำลังดึงข้อมูลตารางคะแนน...</span>
           </div>
         )}
 
         {error && (
-          <div className="glass-card p-8 text-center max-w-md mx-auto space-y-4">
-            <span className="text-4xl">⚠️</span>
-            <h3 className="text-lg font-bold text-white">Failed to Load Standings</h3>
-            <p className="text-sm text-stadium-400">
-              Could not retrieve standings data. Make sure the backend scheduler or a manual sync has run.
+          <div className="bg-slate-900 border border-slate-850 p-8 text-center max-w-md mx-auto rounded-2xl space-y-4 shadow-xl">
+            <span className="text-3xl">⚠️</span>
+            <h3 className="text-base font-bold text-white">โหลดตารางคะแนนไม่สำเร็จ</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              ไม่สามารถดึงข้อมูลตารางคะแนนได้ในขณะนี้ กรุณาตรวจสอบว่ามีข้อมูลในฐานข้อมูล หรือได้รันสคริปต์ซิงค์ข้อมูลแล้วหรือไม่
             </p>
             <button
               onClick={() => {}}
-              className="btn-secondary text-sm"
+              className="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 hover:text-white"
             >
-              Try Again
+              ลองใหม่อีกครั้ง
             </button>
           </div>
         )}
@@ -162,8 +168,8 @@ export default function StandingsPage() {
                 standings={filteredStandings.standings}
               />
             ) : (
-              <div className="glass-card p-12 text-center text-stadium-400">
-                No teams matched "{searchQuery}"
+              <div className="bg-slate-900/40 border border-slate-900 p-12 text-center text-slate-450 text-xs rounded-2xl">
+                ไม่พบทีมที่ค้นหาสำหรับคำว่า "{searchQuery}"
               </div>
             )}
           </div>

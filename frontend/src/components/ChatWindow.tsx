@@ -1,5 +1,6 @@
 /**
  * ChatWindow — main chat interface with message list and input.
+ * Translated to Thai with premium welcomes and suggestion chips.
  */
 import { useState, useRef, useEffect } from 'react'
 import MessageBubble from './MessageBubble'
@@ -29,7 +30,7 @@ export default function ChatWindow({ sessionId, onSessionCreated, onPredictMatch
   // Handle external predict match requests
   useEffect(() => {
     if (onPredictMatch) {
-      // This is set from parent — we don't need to do anything here
+      // Handled via window method
     }
   }, [onPredictMatch])
 
@@ -62,35 +63,34 @@ export default function ChatWindow({ sessionId, onSessionCreated, onPredictMatch
   }, [sessionId])
 
   const suggestions = [
-    "Who will win Arsenal vs Man City this weekend?",
-    "Show me Premier League standings",
-    "Compare Liverpool and Chelsea's recent form",
-    "What are the upcoming Champions League fixtures?",
+    "อาร์เซนอล ปะทะ แมนฯ ซิตี้ ใครมีโอกาสชนะมากกว่ากัน?",
+    "ขอดูอันดับตารางคะแนนพรีเมียร์ลีกอังกฤษล่าสุดหน่อย",
+    "เปรียบเทียบฟอร์มล่าสุดของ ลิเวอร์พูล กับ เชลซี",
+    "โปรแกรมการแข่งขันยูฟ่า แชมเปียนส์ลีก มีคู่ไหนน่าสนใจบ้าง?",
   ]
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#0a111a]">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full animate-fade-in">
-            <div className="text-6xl mb-6">⚽</div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-pitch-400 to-pitch-600 bg-clip-text text-transparent mb-2">
-              Football RAG Chatbot
+          <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center animate-fade-in">
+            <div className="text-5xl mb-5 animate-bounce">⚽</div>
+            <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+              คุยเรื่องบอลกับ AI อัจฉริยะ
             </h2>
-            <p className="text-stadium-400 text-sm mb-8 text-center max-w-md">
-              Ask me anything about football — teams, players, standings, or get match predictions powered by real data.
+            <p className="text-slate-400 text-xs sm:text-sm mb-8 leading-relaxed">
+              ถามสถิติต่างๆ ตารางคะแนน เปรียบเทียบฟอร์มทีมการแข่งขัน หรือวิเคราะห์เชิงลึกด้วยฐานข้อมูล RAG ประมวลผลแบบเรียลไทม์
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg">
+            <div className="grid grid-cols-1 gap-2.5 w-full">
               {suggestions.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => sendMessage(s)}
-                  className="glass-card-hover p-3 text-left text-sm text-stadium-300 
-                             hover:text-pitch-300 transition-colors"
+                  className="bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-left text-xs text-slate-300 hover:text-emerald-400 transition-all duration-200 shadow-md active:scale-98 flex items-center"
                 >
-                  <span className="text-pitch-500 mr-2">→</span>
-                  {s}
+                  <span className="text-emerald-500 mr-2.5 font-bold">➜</span>
+                  <span className="truncate">{s}</span>
                 </button>
               ))}
             </div>
@@ -109,36 +109,35 @@ export default function ChatWindow({ sessionId, onSessionCreated, onPredictMatch
 
       {/* Error banner */}
       {error && (
-        <div className="mx-4 mb-2 px-4 py-2 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-sm">
-          ⚠️ {error}
+        <div className="mx-4 mb-2 px-4 py-2.5 bg-red-950/20 border border-red-900/30 rounded-xl text-red-400 text-xs">
+          ⚠️ เกิดข้อผิดพลาด: {error}
         </div>
       )}
 
       {/* Input area */}
-      <div className="p-4 border-t border-stadium-800/50">
-        <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+      <div className="p-4 border-t border-slate-900 bg-slate-950/20">
+        <form onSubmit={handleSubmit} className="flex gap-3 items-end max-w-4xl mx-auto">
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about football... (Enter to send, Shift+Enter for new line)"
+              placeholder="พิมพ์ถามข้อมูลฟุตบอลที่นี่... (กด Enter เพื่อส่งข้อความ)"
               rows={1}
-              className="input-field resize-none min-h-[48px] max-h-[120px] pr-4"
+              className="w-full px-4 py-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500/50 resize-none min-h-[48px] max-h-[120px] pr-4 text-xs sm:text-sm transition-all shadow-inner"
               disabled={isStreaming}
             />
           </div>
           <button
             type="submit"
             disabled={!input.trim() || isStreaming}
-            className="btn-primary h-[48px] px-6 flex items-center gap-2 
-                       disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-[48px] px-6 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm flex items-center gap-1.5"
           >
             {isStreaming ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
             ) : (
-              <span>Send</span>
+              <span>ส่งคำถาม</span>
             )}
           </button>
         </form>

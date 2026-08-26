@@ -46,42 +46,55 @@ export default function ChatPage() {
               </svg>
             </div>
             <span className="hidden md:flex flex-col leading-none">
-              <span className="text-white font-black text-sm tracking-tight">FOOTBALL</span>
-              <span className="text-emerald-400 text-[9px] font-black tracking-widest">AI ANALYTICS</span>
+              <span className="text-white font-black text-sm tracking-tight">FOOTBALL AI</span>
+              <span className="text-emerald-400 text-[9px] font-black tracking-widest uppercase">วิเคราะห์อัจฉริยะ</span>
             </span>
           </div>
 
-          {/* Center Navigation Links divided by | */}
-          <nav className="flex items-center gap-1.5 sm:gap-2.5 text-xs sm:text-sm font-bold text-slate-400 select-none">
+          {/* Center Navigation Links using premium pills */}
+          <nav className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-400 select-none bg-slate-950/40 p-1 rounded-full border border-slate-900">
             <button
               onClick={() => setView('preview')}
-              className={`hover:text-white transition-colors py-1 ${view === 'preview' ? 'text-emerald-400 font-extrabold' : ''}`}
+              className={`transition-all duration-300 px-3.5 py-1.5 rounded-full ${
+                view === 'preview'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                  : 'border border-transparent hover:text-white'
+              }`}
             >
-              Previews
+              วิเคราะห์บอล
             </button>
-            <span className="text-slate-700">|</span>
             
             <button
               onClick={() => setView('comparison')}
-              className={`hover:text-white transition-colors py-1 ${view === 'comparison' ? 'text-emerald-400 font-extrabold' : ''}`}
+              className={`transition-all duration-300 px-3.5 py-1.5 rounded-full ${
+                view === 'comparison'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                  : 'border border-transparent hover:text-white'
+              }`}
             >
-              Comparison
+              เปรียบเทียบทีม
             </button>
-            <span className="text-slate-700">|</span>
 
             <button
               onClick={() => setView('standings')}
-              className={`hover:text-white transition-colors py-1 ${view === 'standings' ? 'text-emerald-400 font-extrabold' : ''}`}
+              className={`transition-all duration-300 px-3.5 py-1.5 rounded-full ${
+                view === 'standings'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                  : 'border border-transparent hover:text-white'
+              }`}
             >
-              Standings
+              ตารางคะแนน
             </button>
-            <span className="text-slate-700">|</span>
 
             <button
               onClick={() => setView('chat')}
-              className={`hover:text-white transition-colors py-1 ${view === 'chat' ? 'text-emerald-400 font-extrabold' : ''}`}
+              className={`transition-all duration-300 px-3.5 py-1.5 rounded-full ${
+                view === 'chat'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                  : 'border border-transparent hover:text-white'
+              }`}
             >
-              Chat
+              คุยกับ AI
             </button>
           </nav>
 
